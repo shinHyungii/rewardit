@@ -18,4 +18,6 @@ public class SocialAccountProfile {
 
     @NotNull
     private String email;
+
+    private String name;
 }

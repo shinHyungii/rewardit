@@ -32,7 +32,7 @@ public class SecurityConfig {
             .addFilterBefore(new JwtAuthFilter(provider), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(
                 authorize -> authorize
-                    .requestMatchers("/member/google/signup").permitAll()
+                    .requestMatchers("/member/google/exists").permitAll()
                     .requestMatchers("/member/google/login").permitAll()
                     .requestMatchers("/campaign/participate/**").authenticated()
                     .requestMatchers("/qr/use").hasRole("SHOP")

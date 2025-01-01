@@ -24,10 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -73,40 +69,28 @@ public class MemberTests {
 
 
     @Test
-    void googleSignup_success() throws Exception {
+    void googleExists_success() throws Exception {
         // given
         String email = "test@gmail.com";
         String code = "1234";
+        String name = "TEST";
         MemberStoreReq request = MemberStoreReq.builder()
             .code(code)
-            .email(email)
-            .name("test")
-            .phone("01039335727")
-            .address("test")
             .build();
 
         // when
         Mockito
             .when(googleLoginClient.getProfile(code))
-            .thenReturn(new SocialAccountProfile(email, email));
+            .thenReturn(new SocialAccountProfile(email, email, name));
 
         // then
         mockMvc.perform(
-                post("/member/google/signup")
+                post("/member/google/exists")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsBytes(request))
             )
-            .andExpect(status().isOk());
-
-        // then
-        Optional<Member> member = memberRepository.findByEmail(email);
-        assertTrue(member.isPresent());
-        assertThat(member.get().getPassword()).isEqualTo(code);
-        assertThat(member.get().getRewardPoint()).isEqualTo(2000);
-
-        Optional<RewarditEvent> event = rewarditEventRepository.findById(1L);
-        assertTrue(event.isPresent());
-        assertThat(event.get().getMemberLimit()).isEqualTo(1);
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data").value(false));
     }
 
 
@@ -115,6 +99,7 @@ public class MemberTests {
         // given
         String email = "test@gmail.com";
         String code = "1234";
+        String name = "TEST";
 
         Member member = Member.builder()
             .loginId(email)
@@ -131,7 +116,7 @@ public class MemberTests {
         // when
         Mockito
             .when(googleLoginClient.getProfile(code))
-            .thenReturn(new SocialAccountProfile(email, email));
+            .thenReturn(new SocialAccountProfile(email, email, name));
 
         // then
         mockMvc.perform(

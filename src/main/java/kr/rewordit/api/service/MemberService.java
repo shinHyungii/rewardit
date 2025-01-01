@@ -41,56 +41,14 @@ public class MemberService {
 
 
     @Transactional
-    public void storeGoogleAccount(MemberStoreReq request) {
+    public boolean existsGoogleAccount(MemberStoreReq request) {
         SocialAccountProfile profile = googleClient.getProfile(request.getCode());
 
         if (profile == null) {
             throw new CustomException(HttpStatus.BAD_REQUEST, "Social user lookup failed");
         }
 
-        if (memberRepository.findByLoginIdOrEmail(request.getEmail(), request.getEmail()).isPresent()) {
-            throw new CustomException(HttpStatus.BAD_REQUEST, "이미 존재하는 회원입니다.");
-        }
-
-        Member newMember = Member.builder()
-            .name(request.getName())
-            .password(request.getCode())
-            .loginId(profile.getEmail())
-            .email(profile.getEmail())
-            .rewardPoint(0)
-            .build();
-
-        memberRepository.save(newMember);
-
-        // event 적립
-
-        List<RewarditEvent> eventList = rewarditEventRepository.findAllEvent(DateUtils.now());
-        log.debug("event exists : {}", !eventList.isEmpty());
-
-        if (!eventList.isEmpty()) {
-
-            eventList.forEach(event -> {
-
-                if (event.getMemberLimit() == null || event.getMemberLimit() > 0) {
-                    log.info("{} 이벤트 {} 포인트 적립", event.getEventName(), event.getEventPoint());
-
-                    newMember.givePoint(2000);
-
-                    RewardHistory rewardHistory = RewardHistory.builder()
-                        .member(newMember)
-                        .adsSubType(event.getEventName())
-                        .eventName(event.getEventName())
-                        .acceptedAt(DateUtils.now())
-                        .remainReward(event.getEventPoint())
-                        .build();
-
-                    rewardHistoryRepository.save(rewardHistory);
-
-                    // 회원 limit -1
-                    event.decMemberLimit();
-                }
-            });
-        }
+        return memberRepository.findByLoginIdOrEmail(profile.getEmail(), profile.getEmail()).isPresent();
     }
 
 
@@ -103,7 +61,49 @@ public class MemberService {
         }
 
         Member member = memberRepository.findByLoginIdOrEmail(profile.getEmail(), profile.getEmail())
-            .orElseThrow(() -> new CustomException(HttpStatus.BAD_REQUEST, "가입되지 않은 회원입니다."));
+            .orElseGet(() -> {
+                Member newMember = Member.builder()
+                    .name(profile.getName())
+                    .password(request.getCode())
+                    .loginId(profile.getEmail())
+                    .email(profile.getEmail())
+                    .rewardPoint(0)
+                    .build();
+
+                memberRepository.save(newMember);
+
+                // event 적립
+
+                List<RewarditEvent> eventList = rewarditEventRepository.findAllEvent(DateUtils.now());
+                log.debug("event exists : {}", !eventList.isEmpty());
+
+                if (!eventList.isEmpty()) {
+
+                    eventList.forEach(event -> {
+
+                        if (event.getMemberLimit() == null || event.getMemberLimit() > 0) {
+                            log.info("{} 이벤트 {} 포인트 적립", event.getEventName(), event.getEventPoint());
+
+                            newMember.givePoint(2000);
+
+                            RewardHistory rewardHistory = RewardHistory.builder()
+                                .member(newMember)
+                                .adsSubType(event.getEventName())
+                                .eventName(event.getEventName())
+                                .acceptedAt(DateUtils.now())
+                                .remainReward(event.getEventPoint())
+                                .build();
+
+                            rewardHistoryRepository.save(rewardHistory);
+
+                            // 회원 limit -1
+                            event.decMemberLimit();
+                        }
+                    });
+                }
+
+                return newMember;
+            });
 
         member.loggedIn();
 

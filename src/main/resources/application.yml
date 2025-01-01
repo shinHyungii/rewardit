@@ -22,6 +22,7 @@ logging:
     org.hibernate.SQL: debug
     org.springframework.web.client: debug
 
+rewardit.url: http://localhost
 
 google:
   client-id: none

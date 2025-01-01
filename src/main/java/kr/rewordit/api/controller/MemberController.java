@@ -23,13 +23,11 @@ public class MemberController extends BaseController {
 
     private final MemberService service;
 
-    @PostMapping("/google/signup")
-    public CommonRes<Void> storeGoogleAccount(@Valid @RequestBody MemberStoreReq request) {
-        log.info("[store] {}", request.getEmail());
+    @PostMapping("/google/exists")
+    public CommonRes<Boolean> existsGoogleAccount(@Valid @RequestBody MemberStoreReq request) {
+        log.info("[exists] {}", request.getCode());
 
-        service.storeGoogleAccount(request);
-
-        return response();
+        return response(service.existsGoogleAccount(request));
     }
 
 

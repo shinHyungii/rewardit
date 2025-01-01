@@ -38,6 +38,7 @@ dependencies {
 
     // database
     runtimeOnly("com.h2database:h2")
+    runtimeOnly("com.mysql:mysql-connector-j")
 
     // query dsl
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")

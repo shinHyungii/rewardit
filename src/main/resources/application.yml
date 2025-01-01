@@ -36,7 +36,5 @@ jwt:
   secret: 7b5fceb6fb6324ed571702087f601c79fd8da337b8ce8cd44b7df7afcd53ca74
 
 greenfee:
-  url: https://api.greenp.kr
-  appcode: qiqJW2In8O
-
-rewardit.url: https://rewardit.com
+  url: https://localhost
+  appcode: appcode

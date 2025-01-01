@@ -1,0 +1,42 @@
+spring:
+  application.name: api
+  h2.console:
+    enabled: true
+    path: /h2-console
+  datasource:
+    url: jdbc:h2:mem:local
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    open-in-view: false
+
+logging:
+  pattern:
+    console: "%yellow(%d{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level) %cyan(%logger{50}) - %msg%n"
+  level:
+    root: info
+    kr.rewordit.api: debug
+    org.hibernate.SQL: debug
+    org.springframework.web.client: debug
+
+
+google:
+  client-id: none
+  client-secret: none
+  url:
+    login-page: https://accounts/google.com/o/oauth2/v2/auth
+    token: https://oauth2.googleapis.com/token
+    user-profile: https://www.googleapis.com/userinfo/v2/me
+    redirection: none
+
+jwt:
+  secret: 7b5fceb6fb6324ed571702087f601c79fd8da337b8ce8cd44b7df7afcd53ca74
+
+greenfee:
+  url: https://api.greenp.kr
+  appcode: qiqJW2In8O
+
+rewardit.url: https://rewardit.com
